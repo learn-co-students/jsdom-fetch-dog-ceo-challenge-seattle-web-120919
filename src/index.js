@@ -8,19 +8,18 @@ fetch(imgUrl)
 })
 .then(function(json){
   // Use this data inside of `json` to do DOM manipulation
-  img_arr = json.message;
-  console.log(json);
-  addImages(img_arr);
+  let arr = json.message;
+  addImages(arr);
 })
 
-function addImages(data) {
+function addImages(img_arr) {
         const dog_images = document.getElementById("dog-image-container");
-        let len = dog_images.length
+        let len = img_arr.length
 
         for (let i = 0; i < len; i++) {
-          let img = document.createElement('img')
-          img.src = img_arr[i]
-        dog_images.appendChild(img)
+          let img = document.createElement('img');
+          img.src = img_arr[i];
+        dog_images.appendChild(img);
     }
 }
 
@@ -60,19 +59,52 @@ function addGreyClick(DOMNode) {
     });
   }
 
+
+document.addEventListener("DOMContentLoaded", function() {
+    breedListener();
+});
+
+
 function breedListener() {
-    let dropdown = document.querySelector("breed-dropdown");
+    let dropdown = document.getElementById("breed-dropdown");
     dropdown.addEventListener('change', function(event) {
       filterBreed(event.target.value);
     });
 }
 
 function filterBreed(letter) {
-    updateBreedList(breeds.filter(breed => breed.startsWith(letter)));
+    fetch(breedUrl)
+        .then(function(response) {
+    return response.json();
+    })
+        .then(function(json){
+        // Use this data inside of `json` to do DOM manipulation
+        console.log(letter);
+        let arr = Object.keys(json.message);
+        getByLetter(arr, letter);
+    })
 }
 
-function updateBreedList(breeds) {
+
+function getByLetter(arr, letter) {
+    removeBreed();
+    let filter = [];
+    let len = arr.length;
+    for (i = 0; i < len; i++) {
+        if(arr[i].charAt(0) === letter) {
+            filter.push(arr[i]);
+        }
+    }
+    breedList(filter);
+    console.log(filter);
+}
+
+function removeBreed() {
     let ul = document.querySelector('#dog-breeds');
-    removeChildren(ul);
-    breeds.forEach(breed => addBreed(breed));
-  }
+    let child = ul.lastElementChild;
+
+    while(child) {
+        ul.removeChild(child);
+        child = ul.lastElementChild;
+    }
+}
